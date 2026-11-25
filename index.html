@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Premium Food App Palette */
     --primary: #E53935;
     --primary-hover: #D32F2F;
     --primary-light: #FFEBEE;
@@ -203,9 +202,15 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
   .food-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
   
+  /* Styles for Unavailable Items */
+  .food-card.unavailable { opacity: 0.75; }
+  .food-card.unavailable .food-img-area img { filter: grayscale(100%) blur(1px); }
+  .food-card.unavailable:hover { transform: none; box-shadow: var(--shadow-sm); }
+  
   .food-img-area { height: 160px; border-radius: 14px; overflow: hidden; position: relative; background: linear-gradient(135deg, var(--bg) 0%, var(--border) 100%); margin-bottom: 14px; display: grid; place-items: center; font-size: 50px; }
   .food-img-area img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; }
   .tag { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; z-index: 2; box-shadow: 0 2px 6px rgba(229,57,53,0.3); }
+  .tag-soldout { background: #4B5563; box-shadow: 0 2px 6px rgba(75,85,99,0.3); }
   
   .food-info { flex: 1; display: flex; flex-direction: column; }
   .food-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
@@ -224,6 +229,8 @@
   .add-btn:hover { background: var(--primary); color: white; }
   .stepper { display: flex; align-items: center; gap: 10px; background: var(--primary); color: white; padding: 6px 12px; border-radius: 10px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 10px rgba(229,57,53,0.2); }
   .stepper button { color: white; font-size: 18px; font-weight: 800; }
+  
+  .soldout-btn { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: not-allowed; }
 
   /* Empty Search State */
   .empty-state { grid-column: 1/-1; text-align: center; padding: 50px 20px; color: var(--text-muted); }
@@ -625,32 +632,33 @@
 /* =========================================
    DATA CONFIGURATION
 ========================================= */
+// এখানে isAvailable: false করে দিলে ওই খাবারটি "Sold Out" হয়ে যাবে।
 const foods = [
-  { id: 1, name: "Puri Sabzi", desc: "Delicious puri served with potato curry", qty: "1 Plate", price: 50, img: "images/puri.jpg", emoji: "🍛", cat: "Meals", tag: "BESTSELLER", isVeg: true,
+  { id: 1, name: "Puri Sabzi", desc: "Delicious puri served with potato curry", qty: "1 Plate", price: 50, img: "images/puri.jpg", emoji: "🍛", cat: "Meals", tag: "BESTSELLER", isVeg: true, isAvailable: true,
     extras: [ { name: "Extra Puri", price: 10, qtyLabel: "1 Pc" }, { name: "Extra Sabzi", price: 20, qtyLabel: "" } ] },
-  { id: 3, name: "Roti Sabzi", desc: "Roti served with mixed vegetable curry", qty: "1 Plate", price: 80, img: "images/roti-sabzi.jpg", emoji: "🥘", cat: "Meals", tag: "", isVeg: true,
+  { id: 3, name: "Roti Sabzi", desc: "Roti served with mixed vegetable curry", qty: "1 Plate", price: 80, img: "images/roti-sabzi.jpg", emoji: "🥘", cat: "Meals", tag: "", isVeg: true, isAvailable: true,
     extras: [ { name: "Extra Roti", price: 7, qtyLabel: "1 Pc" }, { name: "Extra Sabzi", price: 25, qtyLabel: "" } ] },
-  { id: 4, name: "Roti Tadka", desc: "Roti with flavorful tadka", qty: "1 Plate", price: 100, img: "images/roti-tadka.jpg", emoji: "🥘", cat: "Meals", tag: "", isVeg: true,
+  { id: 4, name: "Roti Tadka", desc: "Roti with flavorful tadka", qty: "1 Plate", price: 100, img: "images/roti-tadka.jpg", emoji: "🥘", cat: "Meals", tag: "", isVeg: true, isAvailable: true,
     extras: [ { name: "Extra Roti", price: 7, qtyLabel: "1 Pc" } ] },
-  { id: 5, name: "Veg Bhat", desc: "Aromatic steamed rice with veggies", qty: "1 Plate", price: 80, img: "images/veg-bhat.jpg", emoji: "🍚", cat: "Meals", tag: "", isVeg: true, extras: [] },
-  { id: 6, name: "Fish Bhat", desc: "Rice served with delicious fish curry", qty: "1 Plate", price: 120, img: "images/fish-bhat.jpg", emoji: "🐟", cat: "Meals", tag: "", isVeg: false,
+  { id: 5, name: "Veg Bhat", desc: "Aromatic steamed rice with veggies", qty: "1 Plate", price: 80, img: "images/veg-bhat.jpg", emoji: "🍚", cat: "Meals", tag: "", isVeg: true, isAvailable: true, extras: [] },
+  { id: 6, name: "Fish Bhat", desc: "Rice served with delicious fish curry", qty: "1 Plate", price: 120, img: "images/fish-bhat.jpg", emoji: "🐟", cat: "Meals", tag: "", isVeg: false, isAvailable: true,
     extras: [ { name: "Extra Fish", price: 40, qtyLabel: "1 Pc" }, { name: "Extra Rice", price: 20, qtyLabel: "" } ] },
-  { id: 7, name: "Chicken Bhat", desc: "Rice served with tender chicken", qty: "1 Plate", price: 140, img: "images/chicken-bhat.jpg", emoji: "🍗", cat: "Meals", tag: "", isVeg: false,
+  { id: 7, name: "Chicken Bhat", desc: "Rice served with tender chicken", qty: "1 Plate", price: 140, img: "images/chicken-bhat.jpg", emoji: "🍗", cat: "Meals", tag: "", isVeg: false, isAvailable: true,
     extras: [ { name: "Extra Chicken", price: 50, qtyLabel: "1 Pc" }, { name: "Extra Rice", price: 20, qtyLabel: "" } ] },
-  { id: 8, name: "Chicken Curry", desc: "Spicy and rich chicken curry", qty: "1 Plate (6 pcs)", price: 100, img: "images/chicken-curry.jpg", emoji: "🍲", cat: "Meals", tag: "", isVeg: false, extras: [] },
-  { id: 10, name: "Chicken Biryani", desc: "Fragrant basmati rice with chicken", qty: "1 Plate", price: 140, img: "images/chicken-biryani.jpg", emoji: "🍛", cat: "Meals", tag: "POPULAR", isVeg: false, extras: [] },
-  { id: 11, name: "Biryani", desc: "Classic veg/mixed biryani", qty: "1 Plate", price: 100, img: "images/biryani.jpg", emoji: "🍚", cat: "Meals", tag: "", isVeg: true, extras: [] },
-  { id: 12, name: "Veg Momo", desc: "Steamed dumplings with veg filling", qty: "1 Plate", price: 50, img: "images/veg-momo.jpg", emoji: "🥟", cat: "Snacks", tag: "", isVeg: true, extras: [] },
-  { id: 13, name: "Chicken Momo", desc: "Steamed dumplings with chicken filling", qty: "1 Plate", price: 80, img: "images/chicken-momo.jpg", emoji: "🥟", cat: "Snacks", tag: "POPULAR", isVeg: false, extras: [] },
-  { id: 14, name: "Chicken Lollipop", desc: "Spicy fried chicken winglets", qty: "1 Piece", price: 30, img: "images/lollipop.jpg", emoji: "🍗", cat: "Snacks", tag: "", isVeg: false, extras: [] },
-  { id: 15, name: "Egg Chowmein", desc: "Stir-fried noodles with egg", qty: "1 Plate", price: 50, img: "images/egg-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: false, extras: [] },
-  { id: 16, name: "Chicken Chowmein", desc: "Stir-fried noodles with chicken", qty: "1 Plate", price: 80, img: "images/chicken-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: false, extras: [] },
-  { id: 17, name: "Veg Chowmein", desc: "Stir-fried noodles with fresh vegetables", qty: "1 Plate", price: 40, img: "images/veg-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: true, extras: [] },
-  { id: 18, name: "Egg Roll", desc: "Paratha wrap with egg filling", qty: "1 Piece", price: 40, img: "images/egg-roll.jpg", emoji: "🌯", cat: "Rolls", tag: "", isVeg: false, extras: [] },
-  { id: 19, name: "Chicken Roll", desc: "Paratha wrap with spicy chicken", qty: "1 Piece", price: 80, img: "images/chicken-roll.jpg", emoji: "🌯", cat: "Rolls", tag: "", isVeg: false, extras: [] },
-  { id: 20, name: "Water Bottle", desc: "Packaged drinking water", qty: "1 Liter", price: 20, img: "images/water.jpg", emoji: "💧", cat: "Drinks", tag: "", isVeg: true, extras: [] },
-  { id: 21, name: "Campa", desc: "Chilled Campa beverage", qty: "1 Piece", price: 35, img: "images/campa.jpg", emoji: "🥤", cat: "Drinks", tag: "", isVeg: true, extras: [] },
-  { id: 22, name: "Hello", desc: "Chilled Hello beverage", qty: "1 Piece", price: 65, img: "images/hello.jpg", emoji: "🧃", cat: "Drinks", tag: "", isVeg: true, extras: [] }
+  { id: 8, name: "Chicken Curry", desc: "Spicy and rich chicken curry", qty: "1 Plate (6 pcs)", price: 100, img: "images/chicken-curry.jpg", emoji: "🍲", cat: "Meals", tag: "", isVeg: false, isAvailable: true, extras: [] },
+  { id: 10, name: "Chicken Biryani", desc: "Fragrant basmati rice with chicken", qty: "1 Plate", price: 140, img: "images/chicken-biryani.jpg", emoji: "🍛", cat: "Meals", tag: "POPULAR", isVeg: false, isAvailable: true, extras: [] },
+  { id: 11, name: "Biryani", desc: "Classic veg/mixed biryani", qty: "1 Plate", price: 100, img: "images/biryani.jpg", emoji: "🍚", cat: "Meals", tag: "", isVeg: true, isAvailable: true, extras: [] },
+  { id: 12, name: "Veg Momo", desc: "Steamed dumplings with veg filling", qty: "1 Plate", price: 50, img: "images/veg-momo.jpg", emoji: "🥟", cat: "Snacks", tag: "", isVeg: true, isAvailable: true, extras: [] },
+  { id: 13, name: "Chicken Momo", desc: "Steamed dumplings with chicken filling", qty: "1 Plate", price: 80, img: "images/chicken-momo.jpg", emoji: "🥟", cat: "Snacks", tag: "POPULAR", isVeg: false, isAvailable: true, extras: [] },
+  { id: 14, name: "Chicken Lollipop", desc: "Spicy fried chicken winglets", qty: "1 Piece", price: 30, img: "images/lollipop.jpg", emoji: "🍗", cat: "Snacks", tag: "", isVeg: false, isAvailable: true, extras: [] },
+  { id: 15, name: "Egg Chowmein", desc: "Stir-fried noodles with egg", qty: "1 Plate", price: 50, img: "images/egg-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: false, isAvailable: true, extras: [] },
+  { id: 16, name: "Chicken Chowmein", desc: "Stir-fried noodles with chicken", qty: "1 Plate", price: 80, img: "images/chicken-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: false, isAvailable: true, extras: [] },
+  { id: 17, name: "Veg Chowmein", desc: "Stir-fried noodles with fresh vegetables", qty: "1 Plate", price: 40, img: "images/veg-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: true, isAvailable: true, extras: [] },
+  { id: 18, name: "Egg Roll", desc: "Paratha wrap with egg filling", qty: "1 Piece", price: 40, img: "images/egg-roll.jpg", emoji: "🌯", cat: "Rolls", tag: "", isVeg: false, isAvailable: true, extras: [] },
+  { id: 19, name: "Chicken Roll", desc: "Paratha wrap with spicy chicken", qty: "1 Piece", price: 80, img: "images/chicken-roll.jpg", emoji: "🌯", cat: "Rolls", tag: "", isVeg: false, isAvailable: true, extras: [] },
+  { id: 20, name: "Water Bottle", desc: "Packaged drinking water", qty: "1 Liter", price: 20, img: "images/water.jpg", emoji: "💧", cat: "Drinks", tag: "", isVeg: true, isAvailable: true, extras: [] },
+  { id: 21, name: "Campa", desc: "Chilled Campa beverage", qty: "1 Piece", price: 35, img: "images/campa.jpg", emoji: "🥤", cat: "Drinks", tag: "", isVeg: true, isAvailable: true, extras: [] },
+  { id: 22, name: "Hello", desc: "Chilled Hello beverage", qty: "1 Piece", price: 65, img: "images/hello.jpg", emoji: "🧃", cat: "Drinks", tag: "", isVeg: true, isAvailable: true, extras: [] }
 ];
 
 const categories = [
@@ -806,21 +814,32 @@ function renderMenu() {
 
   grid.innerHTML = list.map((food, index) => {
     const cnt = cart[food.id] ? cart[food.id].qty : 0;
-    const action = cnt > 0
-      ? `<div class="stepper">
-           <button onclick="updateCart(${food.id}, -1)">−</button>
-           <span>${cnt}</span>
-           <button onclick="handleAddClick(${food.id})">+</button>
-         </div>`
-      : `<button class="add-btn" onclick="handleAddClick(${food.id})">ADD</button>`;
+    const isAvail = food.isAvailable !== false;
+    
+    // Action Button logic based on availability
+    let action = '';
+    if (!isAvail) {
+      action = `<button class="soldout-btn" disabled>Sold Out</button>`;
+    } else {
+      action = cnt > 0
+        ? `<div class="stepper">
+             <button onclick="updateCart(${food.id}, -1)">−</button>
+             <span>${cnt}</span>
+             <button onclick="handleAddClick(${food.id})">+</button>
+           </div>`
+        : `<button class="add-btn" onclick="handleAddClick(${food.id})">ADD</button>`;
+    }
 
-    // Staggered animation delay
     const delay = (index % 10) * 0.05;
+    const unavailableClass = !isAvail ? 'unavailable' : '';
+    const tagHTML = !isAvail 
+      ? `<span class="tag tag-soldout">SOLD OUT</span>` 
+      : (food.tag ? `<span class="tag">${food.tag}</span>` : '');
 
     return `
-      <div class="food-card" style="animation-delay: ${delay}s;">
+      <div class="food-card ${unavailableClass}" style="animation-delay: ${delay}s;">
         <div class="food-img-area">
-          ${food.tag ? `<span class="tag">${food.tag}</span>` : ''}
+          ${tagHTML}
           <span>${food.emoji}</span>
           <img src="${food.img}" alt="${food.name}" loading="lazy" onerror="this.style.display='none'">
         </div>
@@ -843,6 +862,10 @@ function renderMenu() {
 
 function handleAddClick(id) {
   const food = foods.find(f => f.id === id);
+  if (food.isAvailable === false) {
+    showToast('⚠️ This item is currently sold out.');
+    return;
+  }
   if (food.extras && food.extras.length > 0) openCustomModal(id);
   else updateCart(id, 1);
 }
