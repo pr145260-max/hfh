@@ -1,23 +1,28 @@
 {
-"background_color": "#ffffff",
-"description": "Order delicious food online from HFH - Haldia Food Hub. Fresh, hot, and delivered fast!",
-"dir": "ltr",
-"display": "standalone",
-"name": "Haldia food hub",
-"orientation": "any",
-"scope": "/",
-"short_name": "HFH",
-"start_url": "/",
-"theme_color": "#E53935",
-"id": "pr145260-max",
-"categories": [
-"food"
-],
-"icons": [
-{
-"src": "images/icon.png",
-"sizes": "512x512",
-"type": "image/png"
-}
-]
+  "background_color": "#ffffff",
+  "description": "Order delicious food online from HFH - Haldia Food Hub. Fresh, hot, and delivered fast!",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Haldia food hub",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "HFH",
+  "start_url": "/",
+  "theme_color": "#E53935",
+  "id": "pr145260-max",
+  "categories": [
+    "food"
+  ],
+  "icons": [
+    {
+      "src": "images/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
