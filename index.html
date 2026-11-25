@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foodie — Premium Food Delivery</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #e23744;
+    --primary-light: #fff0f1;
+    --bg: #f8f9fa;
+    --surface: #ffffff;
+    --text-main: #1c1c1c;
+    --text-muted: #7e808c;
+    --border: #e8e8e8;
+    --green: #1aab2e;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+    --shadow-lg: 0 16px 40px rgba(0,0,0,0.12);
+    --input-bg: #ffffff;
+  }
+
+  [data-theme="dark"] {
+    --primary: #ff4d5a;
+    --primary-light: #3a1c1f;
+    --bg: #121212;
+    --surface: #1e1e1e;
+    --text-main: #f1f1f1;
+    --text-muted: #a0a0a0;
+    --border: #333333;
+    --green: #2ecc71;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+    --input-bg: #2a2a2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); overflow-x: hidden; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  input, select, textarea { font-family: inherit; }
+
+  .app-container { max-width: 1200px; margin: 0 auto; background: var(--bg); min-height: 100vh; position: relative; padding-bottom: 80px; }
+
+  /* Header */
+  header { background: var(--surface); padding: 16px 5%; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border); }
+  .brand { font-size: 24px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;}
+  .brand span { color: var(--primary); }
+  .location { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 2px;}
+  .location b { color: var(--text-main); font-size: 14px; display: flex; align-items: center; gap: 4px;}
+  .header-actions { display: flex; align-items: center; gap: 15px; }
+  .theme-toggle { font-size: 20px; background: var(--bg); padding: 8px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+  
+  .desktop-cart-btn { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(226, 55, 68, 0.3); }
+  .cart-badge { background: white; color: var(--primary); padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: 800; }
+
+  /* Hero */
+  .hero { margin: 20px 5%; background: linear-gradient(135deg, #1c1c1c, #3a3a3a); border-radius: 24px; padding: 40px; color: white; display: flex; align-items: center; justify-content: space-between; overflow: hidden; }
+  .hero-text { position: relative; z-index: 2; max-width: 500px; }
+  .hero h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin-bottom: 15px; letter-spacing: -1px;}
+  .hero p { font-size: 15px; color: #b3b3b3; margin-bottom: 25px; }
+  .hero-btn { background: var(--primary); color: white; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 15px; }
+
+  /* Search & Filter */
+  .filter-bar { padding: 0 5%; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 250px; display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 12px 18px; box-shadow: var(--shadow-sm); }
+  .search-box input { width: 100%; border: none; outline: none; font-size: 15px; color: var(--text-main); background: transparent; margin-left: 10px; }
+  .sort-box { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); padding: 12px 18px; border-radius: 16px; font-size: 14px; font-weight: 600; outline: none; box-shadow: var(--shadow-sm); cursor: pointer; }
+
+  /* Categories */
+  .categories-wrap { padding: 0 5%; margin-bottom: 25px; }
+  .categories { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+  .categories::-webkit-scrollbar { display: none; }
+  .cat-btn { flex-shrink: 0; padding: 10px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 30px; font-weight: 600; font-size: 14px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); }
+  .cat-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+  /* Menu Grid */
+  .menu-section { padding: 0 5%; }
+  .section-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  
+  .food-card { background: var(--surface); border-radius: 20px; padding: 12px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; position: relative; }
+  .food-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  
+  .food-img-area { height: 160px; border-radius: 14px; overflow: hidden; position: relative; background: #f4f4f5; margin-bottom: 15px; display: grid; place-items: center; font-size: 60px; }
+  .food-img-area img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1;}
+  .tag { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; z-index: 2; }
+  
+  .food-info { flex: 1; display: flex; flex-direction: column; }
+  .food-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+  .food-title { font-size: 16px; font-weight: 700; line-height: 1.3;}
+  
+  .diet-icon { width: 14px; height: 14px; border: 1.5px solid; border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 3px; }
+  .diet-icon::after { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .diet-veg { border-color: var(--green); }
+  .diet-veg::after { background: var(--green); }
+  .diet-nonveg { border-color: #d32f2f; }
+  .diet-nonveg::after { background: #d32f2f; }
+
+  .food-qty { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; background: var(--bg); display: inline-block; padding: 2px 8px; border-radius: 4px; width: fit-content;}
+  .food-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4; flex-grow: 1; }
+  .food-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto;}
+  .food-price { font-size: 18px; font-weight: 800; }
+  
+  .add-btn { background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 13px; }
+  .add-btn:hover { background: var(--primary); color: white; }
+  
+  .stepper { display: flex; align-items: center; gap: 12px; background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 14px; }
+  .stepper button { color: white; font-size: 18px; font-weight: 800; }
+
+  /* Cart Drawer */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; backdrop-filter: blur(2px); }
+  .overlay.active { opacity: 1; pointer-events: all; }
+  .cart-drawer { position: fixed; top: 0; right: -450px; bottom: 0; width: 100%; max-width: 400px; background: var(--surface); z-index: 100; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .cart-drawer.active { right: 0; }
+  
+  .cart-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg); }
+  .close-btn { background: var(--surface); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); font-size: 16px; color: var(--text-main);}
+
+  .cart-items { flex: 1; overflow-y: auto; padding: 20px; }
+  .cart-item-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px dashed var(--border); }
+  .cart-item-info { display: flex; gap: 12px; align-items: flex-start; flex: 1; }
+  .cart-emoji { width: 45px; height: 45px; border-radius: 8px; overflow: hidden; flex-shrink: 0; display: grid; place-items: center; background: #f4f4f5; font-size: 24px; position: relative;}
+  .cart-emoji img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index:1;}
+  .cart-item-details { flex: 1; }
+  .cart-item-details b { display: block; font-size: 14px; margin-bottom: 4px; line-height: 1.2;}
+  .cart-item-details small { color: var(--text-muted); font-size: 12px; font-weight: 600;}
+  .cart-extras-text { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; line-height: 1.3;}
+  
+  .cart-footer { padding: 20px; background: var(--bg); border-top: 1px solid var(--border); }
+  .bill-details { margin-bottom: 20px; }
+  .bill-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;}
+  .bill-row.total { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .checkout-btn { width: 100%; background: var(--primary); color: white; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .empty-cart { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-cart div { font-size: 60px; margin-bottom: 15px; opacity: 0.5; }
+
+  /* --- Customization Modal (Bottom Sheet) --- */
+  .custom-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; opacity: 0; pointer-events: none; display: flex; align-items: flex-end; justify-content: center; }
+  .custom-modal-overlay.active { opacity: 1; pointer-events: all; }
+  .custom-modal-content {
+    background: var(--surface); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0;
+    padding: 24px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 85vh; display: flex; flex-direction: column;
+  }
+  .custom-modal-overlay.active .custom-modal-content { transform: translateY(0); }
+  
+  .custom-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .custom-header h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .custom-header p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  
+  .extra-title { font-size: 13px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; margin-top: 10px;}
+  
+  .extra-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px;
+    margin-bottom: 12px; background: var(--surface);
+  }
+  .extra-info b { display: block; font-size: 15px; font-weight: 600; margin-bottom: 2px;}
+  .extra-info span { font-size: 13px; color: var(--primary); font-weight: 700; }
+  
+  .extra-stepper { display: flex; align-items: center; gap: 12px; background: var(--bg); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+  .extra-stepper button { width: 28px; height: 28px; display: grid; place-items: center; font-size: 16px; font-weight: bold; color: var(--text-main); }
+  .extra-stepper span { font-weight: 700; font-size: 14px; width: 20px; text-align: center; }
+
+  .custom-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border);
+  }
+  .custom-total { display: flex; flex-direction: column; }
+  .custom-total small { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
+  .custom-total b { font-size: 22px; font-weight: 800; color: var(--primary); }
+  
+  .add-custom-btn { background: var(--primary); color: white; padding: 14px 24px; border-radius: 12px; font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 8px;}
+
+  /* Modals & Toast */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 150; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; padding: 20px; }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+  .modal-content { background: var(--surface); width: 100%; max-width: 400px; border-radius: 24px; padding: 30px; position: relative; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: 0.3s; }
+  .modal-overlay.active .modal-content { transform: scale(1); }
+  
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;}
+  .form-group input, .form-group textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; outline: none; background: var(--input-bg); color: var(--text-main); }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+  
+  .success-screen { text-align: center; display: none; }
+  .success-screen.active { display: block; }
+  .success-icon { font-size: 70px; margin-bottom: 20px; animation: bounceIn 0.6s; }
+  @keyframes bounceIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+  
+  .toast-container { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
+  .toast { background: var(--text-main); color: var(--surface); padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-lg); animation: slideUp 0.3s forwards; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+  .mobile-cart-bar { position: fixed; bottom: 20px; left: 5%; right: 5%; background: var(--primary); color: white; padding: 15px 20px; border-radius: 16px; display: none; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(226, 55, 68, 0.4); z-index: 40; font-weight: 700; cursor: pointer;}
+
+  @media(max-width: 768px) {
+    .desktop-cart-btn { display: none; }
+    .mobile-cart-bar { display: flex; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px;}
+  }
+  @media(max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+    .food-card { flex-direction: row; height: 140px; padding: 12px; gap: 15px;}
+    .food-img-area { width: 110px; height: 100%; margin-bottom: 0; flex-shrink: 0;}
+    .food-info { padding: 5px 0; }
+    .food-desc { display: none; } 
+    .food-bottom { margin-top: auto; }
+    .filter-bar { flex-direction: column; gap: 10px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Header -->
+  <header>
+    <div>
+      <div class="brand">food<span>ie.</span></div>
+      <div class="location">DELIVERING TO <b>📍 Home</b></div>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="desktop-cart-btn" onclick="toggleCart(true)">
+        🛒 Cart <span class="cart-badge" id="cartCountDesktop">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Delicious food,<br>delivered to you.</h1>
+      <p>Order from our exclusive menu and satisfy your cravings.</p>
+      <button class="hero-btn" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'})">Browse Menu →</button>
+    </div>
+  </section>
+
+  <!-- Search & Sort -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <span style="font-size: 18px;">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search for dishes..." oninput="renderMenu()">
+    </div>
+    <select class="sort-box" id="sortSelect" onchange="renderMenu()">
+      <option value="default">Sort by: Recommended</option>
+      <option value="low-high">Price: Low to High</option>
+      <option value="high-low">Price: High to Low</option>
+      <option value="name">Name: A to Z</option>
+    </select>
+  </div>
+
+  <!-- Categories -->
+  <div class="categories-wrap">
+    <div class="categories" id="categoryList"></div>
+  </div>
+
+  <!-- Menu Grid -->
+  <main class="menu-section" id="menu">
+    <h2 class="section-title">Explore Our Menu</h2>
+    <div class="grid" id="foodGrid"></div>
+  </main>
+</div>
+
+<!-- Mobile Floating Cart -->
+<div class="mobile-cart-bar" id="mobileCartBtn" onclick="toggleCart(true)" style="display: none;">
+  <span id="mobileCartCount">0 items</span>
+  <span>₹<span id="mobileCartTotal">0</span> →</span>
+</div>
+
+<!-- Cart Drawer -->
+<div class="overlay" id="cartOverlay" onclick="toggleCart(false)"></div>
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h2>Your Cart 🛒</h2>
+    <button class="close-btn" onclick="toggleCart(false)">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsContainer"></div>
+  <div class="cart-footer" id="cartFooter" style="display: none;">
+    <div class="bill-details">
+      <div class="bill-row"><span>Item Total</span><span id="billSubtotal">₹0</span></div>
+      <div class="bill-row"><span>Delivery Fee</span><span style="color: var(--green);">FREE</span></div>
+      <div class="bill-row total"><span>To Pay</span><span id="billTotal">₹0</span></div>
+    </div>
+    <button class="checkout-btn" onclick="openCheckout()">
+      <span>Proceed to Checkout</span>
+      <span>→</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Customization Modal (Bottom Sheet) -->
+<div class="custom-modal-overlay" id="customModal" onclick="if(event.target===this)closeCustomModal()">
+  <div class="custom-modal-content">
+    <div class="custom-header">
+      <div>
+        <h2 id="customFoodName">Item Name</h2>
+        <p>Portion: <span id="customFoodQty">1 Plate</span></p>
+      </div>
+      <button class="close-btn" onclick="closeCustomModal()">✕</button>
+    </div>
+    
+    <div style="overflow-y: auto; flex: 1; padding-right: 5px;">
+      <div class="extra-title" id="extraTitle">Add Extra Toppings</div>
+      <div id="extrasContainer"></div>
+    </div>
+
+    <div class="custom-footer">
+      <div class="custom-total">
+        <small>TOTAL AMOUNT</small>
+        <b id="customTotalPrice">₹0</b>
+      </div>
+      <button class="add-custom-btn" onclick="addCustomToCart()">
+        <span>🛒</span> Add to Cart
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal-content">
+    <div id="checkoutForm">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Checkout</h2>
+        <button class="close-btn" onclick="closeCheckout()">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="custName" placeholder="John Doe">
+      </div>
+      <div class="form-group">
+        <label>Delivery Address</label>
+        <textarea id="custAddress" rows="3" placeholder="Flat, Building, Street"></textarea>
+      </div>
+      <button class="checkout-btn" style="margin-top: 10px;" onclick="placeOrder()">
+        <span>Place Order via WhatsApp</span>
+        <span id="modalTotal" style="font-weight: 800;">₹0</span>
+      </button>
+      <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 15px;">Payment: Cash on Delivery</p>
+    </div>
+
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">🎉</div>
+      <h2 style="color: var(--green); margin-bottom: 10px;">Order Sent!</h2>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">
+        Thank you, <b id="successName" style="color: var(--text-main);"></b>.<br>
+        Your order details are ready to be sent on WhatsApp. Please press "Send" in the WhatsApp app.
+      </p>
+      <button class="checkout-btn" onclick="finishOrder()" style="justify-content: center;">
+        Back to Home
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* =========================================
+   DATA CONFIGURATION
+   (এখানে আপনার ইমেজের নাম অনুযায়ী পাথ পরিবর্তন করে দিবেন। 
+    যেমন: img: "images/roti.jpg" )
+========================================= */
+const foods = [
+  { id: 1, name: "Puri Sabzi", desc: "Delicious puri served with potato curry", qty: "1 Plate", price: 50, img: "images/puri.jpg", emoji: "🍛", cat: "Meals", tag: "BESTSELLER", isVeg: true, 
+    extras: [ { name: "Extra Puri", price: 10, qtyLabel: "1 Pc" }, { name: "Extra Sabzi", price: 20, qtyLabel: "" } ] 
+  },
+  { id: 2, name: "Roti", desc: "Freshly made soft roti", qty: "1 Piece", price: 7, img: "images/roti.jpg", emoji: "🫓", cat: "Breads", tag: "", isVeg: true, extras: [] },
+  { id: 3, name: "Roti Sabzi", desc: "Roti served with mixed vegetable curry", qty: "1 Plate", price: 80, img: "images/roti-sabzi.jpg", emoji: "🥘", cat: "Meals", tag: "", isVeg: true,
+    extras: [ { name: "Extra Roti", price: 7, qtyLabel: "1 Pc" }, { name: "Extra Sabzi", price: 25, qtyLabel: "" } ]
+  },
+  { id: 4, name: "Roti Tadka", desc: "Roti with flavorful tadka", qty: "1 Plate", price: 100, img: "images/roti-tadka.jpg", emoji: "🥘", cat: "Meals", tag: "", isVeg: true, 
+    extras: [ { name: "Extra Roti", price: 7, qtyLabel: "1 Pc" } ]
+  },
+  { id: 5, name: "Veg Bhat", desc: "Aromatic steamed rice with veggies", qty: "1 Plate", price: 80, img: "images/veg-bhat.jpg", emoji: "🍚", cat: "Meals", tag: "", isVeg: true, extras: [] },
+  { id: 6, name: "Fish Bhat", desc: "Rice served with delicious fish curry", qty: "1 Plate", price: 120, img: "images/fish-bhat.jpg", emoji: "🐟", cat: "Meals", tag: "", isVeg: false, 
+    extras: [ { name: "Extra Fish", price: 40, qtyLabel: "1 Pc" }, { name: "Extra Rice", price: 20, qtyLabel: "" } ]
+  },
+  { id: 7, name: "Chicken Bhat", desc: "Rice served with tender chicken", qty: "1 Plate", price: 140, img: "images/chicken-bhat.jpg", emoji: "🍗", cat: "Meals", tag: "", isVeg: false, 
+    extras: [ { name: "Extra Chicken", price: 50, qtyLabel: "1 Pc" }, { name: "Extra Rice", price: 20, qtyLabel: "" } ]
+  },
+  { id: 8, name: "Chicken Curry", desc: "Spicy and rich chicken curry", qty: "1 Plate (6 pcs)", price: 100, img: "images/chicken-curry.jpg", emoji: "🍲", cat: "Meals", tag: "", isVeg: false, extras: [] },
+  { id: 9, name: "Fish", desc: "Fried or curried fish piece", qty: "1 Piece", price: 40, img: "images/fish.jpg", emoji: "🐟", cat: "Meals", tag: "", isVeg: false, extras: [] },
+  { id: 10, name: "Chicken Biryani", desc: "Fragrant basmati rice with chicken", qty: "1 Plate", price: 140, img: "images/chicken-biryani.jpg", emoji: "🍛", cat: "Meals", tag: "POPULAR", isVeg: false, extras: [] },
+  { id: 11, name: "Biryani", desc: "Classic veg/mixed biryani", qty: "1 Plate", price: 100, img: "images/biryani.jpg", emoji: "🍚", cat: "Meals", tag: "", isVeg: true, extras: [] },
+  { id: 12, name: "Veg Momo", desc: "Steamed dumplings with veg filling", qty: "1 Plate", price: 50, img: "images/veg-momo.jpg", emoji: "🥟", cat: "Snacks", tag: "", isVeg: true, extras: [] },
+  { id: 13, name: "Chicken Momo", desc: "Steamed dumplings with chicken filling", qty: "1 Plate", price: 80, img: "images/chicken-momo.jpg", emoji: "🥟", cat: "Snacks", tag: "POPULAR", isVeg: false, extras: [] },
+  { id: 14, name: "Chicken Lollipop", desc: "Spicy fried chicken winglets", qty: "1 Piece", price: 30, img: "images/lollipop.jpg", emoji: "🍗", cat: "Snacks", tag: "", isVeg: false, extras: [] },
+  { id: 15, name: "Egg Chowmein", desc: "Stir-fried noodles with egg", qty: "1 Plate", price: 50, img: "images/egg-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: false, extras: [] },
+  { id: 16, name: "Chicken Chowmein", desc: "Stir-fried noodles with chicken", qty: "1 Plate", price: 80, img: "images/chicken-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: false, extras: [] },
+  { id: 17, name: "Veg Chowmein", desc: "Stir-fried noodles with fresh vegetables", qty: "1 Plate", price: 40, img: "images/veg-chowmein.jpg", emoji: "🍜", cat: "Snacks", tag: "", isVeg: true, extras: [] },
+  { id: 18, name: "Egg Roll", desc: "Paratha wrap with egg filling", qty: "1 Piece", price: 40, img: "images/egg-roll.jpg", emoji: "🌯", cat: "Rolls", tag: "", isVeg: false, extras: [] },
+  { id: 19, name: "Chicken Roll", desc: "Paratha wrap with spicy chicken", qty: "1 Piece", price: 80, img: "images/chicken-roll.jpg", emoji: "🌯", cat: "Rolls", tag: "", isVeg: false, extras: [] },
+  { id: 20, name: "Water Bottle", desc: "Packaged drinking water", qty: "1 Liter", price: 20, img: "images/water.jpg", emoji: "💧", cat: "Drinks", tag: "", isVeg: true, extras: [] },
+  { id: 21, name: "Campa", desc: "Chilled Campa beverage", qty: "1 Piece", price: 35, img: "images/campa.jpg", emoji: "🥤", cat: "Drinks", tag: "", isVeg: true, extras: [] },
+  { id: 22, name: "Hello", desc: "Chilled Hello beverage", qty: "1 Piece", price: 65, img: "images/hello.jpg", emoji: "🧃", cat: "Drinks", tag: "", isVeg: true, extras: [] }
+];
+
+const categories = [
+  { id: "All", icon: "✨" },
+  { id: "Meals", icon: "🍛" },
+  { id: "Snacks", icon: "🍟" },
+  { id: "Rolls", icon: "🌯" },
+  { id: "Breads", icon: "🫓" },
+  { id: "Drinks", icon: "🥤" }
+];
+
+let activeCategory = "All";
+// কার্টে এখন কী (Key) হিসেবে ইউনিক আইডি থাকবে, কারণ একই খাবার এক্সট্রা দিয়ে এবং ছাড়া রাখা যাবে
+let cart = JSON.parse(localStorage.getItem('foodie_cart_v2')) || {};
+
+/* =========================================
+   THEME LOGIC
+========================================= */
+const themeBtn = document.getElementById('themeBtn');
+const currentTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', currentTheme);
+themeBtn.innerText = currentTheme === 'dark' ? '☀️' : '🌙';
+
+function toggleTheme() {
+  const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  themeBtn.innerText = theme === 'dark' ? '☀️' : '🌙';
+}
+
+/* =========================================
+   RENDER FUNCTIONS
+========================================= */
+function saveCart() {
+  localStorage.setItem('foodie_cart_v2', JSON.stringify(cart));
+  updateUI();
+}
+
+const formatMoney = (amount) => "₹" + amount;
+
+function renderCategories() {
+  document.getElementById('categoryList').innerHTML = categories.map(cat => `
+    <button class="cat-btn ${activeCategory === cat.id ? 'active' : ''}" onclick="setCategory('${cat.id}')">
+      <span>${cat.icon}</span> ${cat.id}
+    </button>
+  `).join('');
+}
+
+function setCategory(catId) {
+  activeCategory = catId;
+  renderCategories();
+  renderMenu();
+}
+
+function renderMenu() {
+  const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  const sortValue = document.getElementById('sortSelect').value;
+  const grid = document.getElementById('foodGrid');
+
+  let filteredFoods = foods.filter(food => {
+    const matchCategory = activeCategory === "All" || food.cat === activeCategory;
+    const matchSearch = food.name.toLowerCase().includes(searchQuery) || food.desc.toLowerCase().includes(searchQuery);
+    return matchCategory && matchSearch;
+  });
+
+  if (sortValue === 'low-high') filteredFoods.sort((a, b) => a.price - b.price);
+  if (sortValue === 'high-low') filteredFoods.sort((a, b) => b.price - a.price);
+  if (sortValue === 'name') filteredFoods.sort((a, b) => a.name.localeCompare(b.name));
+
+  if (filteredFoods.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);"><h3>No items found 😔</h3></div>`;
+    return;
+  }
+
+  grid.innerHTML = filteredFoods.map(food => {
+    // চেক করা হচ্ছে এই নির্দিষ্ট খাবার কার্টে আছে কিনা (এক্সট্রা ছাড়া)
+    const itemCount = cart[food.id] ? cart[food.id].qty : 0; 
+
+    // যদি খাবারটিতে extras থাকে, তবে "ADD" এ ক্লিক করলে মডাল ওপেন হবে
+    const actionHTML = itemCount > 0 
+      ? `<div class="stepper">
+           <button onclick="updateCart(${food.id}, -1)">−</button>
+           <span>${itemCount}</span>
+           <button onclick="handleAddClick(${food.id})">+</button>
+         </div>`
+      : `<button class="add-btn" onclick="handleAddClick(${food.id})">ADD</button>`;
+
+    return `
+      <div class="food-card">
+        <div class="food-img-area">
+          ${food.tag ? `<span class="tag">${food.tag}</span>` : ''}
+          <span>${food.emoji}</span>
+          <img src="${food.img}" alt="${food.name}" loading="lazy" onerror="this.style.display='none'">
+        </div>
+        <div class="food-info">
+          <div class="food-title-row">
+            <div class="food-title">${food.name}</div>
+            <div class="diet-icon ${food.isVeg ? 'diet-veg' : 'diet-nonveg'}"></div>
+          </div>
+          <div class="food-qty">${food.qty}</div>
+          <div class="food-desc">${food.desc}</div>
+          <div class="food-bottom">
+            <div class="food-price">${formatMoney(food.price)}</div>
+            ${actionHTML}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* =========================================
+   CUSTOMIZATION MODAL LOGIC
+========================================= */
+let currentFoodId = null;
+let currentExtras = {}; // আপাতত সিলেক্ট করা এক্সট্রাগুলোর পরিমাণ রাখার জন্য
+
+function handleAddClick(id) {
+  const food = foods.find(f => f.id === id);
+  if (food.extras && food.extras.length > 0) {
+    openCustomModal(id);
+  } else {
+    updateCart(id, 1); // এক্সট্রা না থাকলে সরাসরি অ্যাড হবে
+  }
+}
+
+function openCustomModal(id) {
+  currentFoodId = id;
+  const food = foods.find(f => f.id === id);
+  
+  document.getElementById('customFoodName').innerText = food.name;
+  document.getElementById('customFoodQty').innerText = food.qty;
+  document.getElementById('customTotalPrice').innerText = formatMoney(food.price);
+
+  // এক্সট্রাগুলোর লিস্ট তৈরি করা
+  currentExtras = {}; 
+  document.getElementById('extrasContainer').innerHTML = food.extras.map((extra, index) => {
+    return `
+      <div class="extra-item">
+        <div class="extra-info">
+          <b>${extra.name} ${extra.qtyLabel ? `(${extra.qtyLabel})` : ''}</b>
+          <span>+${formatMoney(extra.price)} each</span>
+        </div>
+        <div class="extra-stepper">
+          <button onclick="changeExtraQty(${index}, -1, ${food.price})">-</button>
+          <span id="extra-qty-${index}">0</span>
+          <button onclick="changeExtraQty(${index}, 1, ${food.price})">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('customModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCustomModal() {
+  document.getElementById('customModal').classList.remove('active');
+  document.body.style.overflow = '';
+  currentFoodId = null;
+}
+
+function changeExtraQty(index, change, basePrice) {
+  const food = foods.find(f => f.id === currentFoodId);
+  const extraItem = food.extras[index];
+  
+  if (!currentExtras[extraItem.name]) currentExtras[extraItem.name] = 0;
+  currentExtras[extraItem.name] += change;
+  
+  if (currentExtras[extraItem.name] < 0) currentExtras[extraItem.name] = 0;
+
+  document.getElementById(`extra-qty-${index}`).innerText = currentExtras[extraItem.name];
+
+  // মোট দাম হিসাব করা
+  let total = basePrice;
+  food.extras.forEach(ext => {
+    const q = currentExtras[ext.name] || 0;
+    total += (ext.price * q);
+  });
+
+  document.getElementById('customTotalPrice').innerText = formatMoney(total);
+}
+
+function addCustomToCart() {
+  const food = foods.find(f => f.id === currentFoodId);
+  
+  // কার্টে অ্যাড করার জন্য ইউনিক কী তৈরি (যেমন: "3_Extra Roti:1,Extra Sabzi:2")
+  let key = currentFoodId.toString();
+  let selectedExtrasList = [];
+  let extraPriceTotal = 0;
+
+  food.extras.forEach(ext => {
+    const q = currentExtras[ext.name] || 0;
+    if (q > 0) {
+      key += `_${ext.name}:${q}`;
+      selectedExtrasList.push({ name: ext.name, qty: q, price: ext.price });
+      extraPriceTotal += (ext.price * q);
+    }
+  });
+
+  const finalPrice = food.price + extraPriceTotal;
+
+  if (cart[key]) {
+    cart[key].qty += 1;
+  } else {
+    cart[key] = {
+      id: currentFoodId,
+      qty: 1,
+      basePrice: food.price,
+      totalPrice: finalPrice,
+      extras: selectedExtrasList
+    };
+  }
+
+  saveCart();
+  renderMenu();
+  closeCustomModal();
+  showToast(`Added to cart`);
+}
+
+/* =========================================
+   CART LOGIC
+========================================= */
+// এটি সাধারণ আইটেমের জন্য (যেগুলোতে extras নেই)
+function updateCart(id, change) {
+  const key = id.toString();
+  if (!cart[key]) {
+    cart[key] = { id: id, qty: 0, basePrice: foods.find(f=>f.id===id).price, totalPrice: foods.find(f=>f.id===id).price, extras: [] };
+  }
+  
+  cart[key].qty += change;
+  if (cart[key].qty <= 0) delete cart[key];
+
+  saveCart();
+  renderMenu();
+}
+
+// কার্ট ড্রয়ার থেকে কোয়ান্টিটি বাড়ানো/কমানো
+function updateCartQtyByKey(key, change) {
+  if (cart[key]) {
+    cart[key].qty += change;
+    if (cart[key].qty <= 0) delete cart[key];
+    saveCart();
+    renderMenu();
+    renderCartDrawer();
+    if(Object.keys(cart).length === 0) toggleCart(false);
+  }
+}
+
+function toggleCart(show) {
+  document.getElementById('cartOverlay').classList.toggle('active', show);
+  document.getElementById('cartDrawer').classList.toggle('active', show);
+  document.body.style.overflow = show ? 'hidden' : '';
+  if (show) renderCartDrawer();
+}
+
+function renderCartDrawer() {
+  const container = document.getElementById('cartItemsContainer');
+  const footer = document.getElementById('cartFooter');
+  const cartKeys = Object.keys(cart);
+
+  if (cartKeys.length === 0) {
+    container.innerHTML = `<div class="empty-cart"><div>🛒</div><h3>Your cart is empty</h3></div>`;
+    footer.style.display = 'none';
+    return;
+  }
+
+  footer.style.display = 'block';
+  let subtotal = 0;
+
+  container.innerHTML = cartKeys.map(key => {
+    const item = cart[key];
+    const foodData = foods.find(f => f.id === item.id);
+    const itemTotal = item.totalPrice * item.qty;
+    subtotal += itemTotal;
+
+    // এক্সট্রাগুলোর নাম ছোট করে দেখানো
+    let extrasText = "";
+    if(item.extras.length > 0) {
+      extrasText = `<span class="cart-extras-text">+ ` + item.extras.map(e => `${e.name} x${e.qty}`).join(', ') + `</span>`;
+    }
+
+    return `
+      <div class="cart-item-row">
+        <div class="cart-item-info">
+          <div class="cart-emoji">
+             ${foodData.emoji}
+             <img src="${foodData.img}" onerror="this.style.display='none'">
+          </div>
+          <div class="cart-item-details">
+            <b>${foodData.name}</b>
+            <small>${formatMoney(itemTotal)}</small>
+            ${extrasText}
+          </div>
+        </div>
+        <div class="stepper" style="background: var(--surface); border: 1px solid var(--border); color: var(--primary); padding: 4px 8px;">
+          <button onclick="updateCartQtyByKey('${key}', -1)">−</button>
+          <span>${item.qty}</span>
+          <button onclick="updateCartQtyByKey('${key}', 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('billSubtotal').innerText = formatMoney(subtotal);
+  document.getElementById('billTotal').innerText = formatMoney(subtotal);
+  document.getElementById('modalTotal').innerText = formatMoney(subtotal);
+}
+
+function updateUI() {
+  const totalItems = Object.values(cart).reduce((a, b) => a + b.qty, 0);
+  document.getElementById('cartCountDesktop').innerText = totalItems;
+
+  const mobileBar = document.getElementById('mobileCartBtn');
+  if (totalItems > 0) {
+    let totalAmount = 0;
+    Object.values(cart).forEach(item => totalAmount += item.totalPrice * item.qty);
+    mobileBar.style.display = 'flex';
+    document.getElementById('mobileCartCount').innerText = `${totalItems} items`;
+    document.getElementById('mobileCartTotal').innerText = totalAmount;
+  } else {
+    mobileBar.style.display = 'none';
+  }
+}
+
+/* =========================================
+   TOAST NOTIFICATION
+========================================= */
+function showToast(message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span>✅</span> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
+/* =========================================
+   CHECKOUT & WHATSAPP INTEGRATION
+========================================= */
+function openCheckout() {
+  if(Object.keys(cart).length === 0) return;
+  toggleCart(false);
+  document.getElementById('checkoutForm').style.display = 'block';
+  document.getElementById('successScreen').classList.remove('active');
+  document.getElementById('checkoutModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function placeOrder() {
+  const name = document.getElementById('custName').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+
+  if (!name || !address) {
+    showToast("Please fill all details ⚠️");
+    return;
+  }
+
+  let orderDetails = "";
+  let totalAmount = 0;
+  
+  Object.keys(cart).forEach(key => {
+    const item = cart[key];
+    const foodData = foods.find(f => f.id === item.id);
+    const qty = item.qty;
+    const price = item.totalPrice * qty;
+    totalAmount += price;
+    
+    // হোয়াটসঅ্যাপ মেসেজে খাবারের সাথে এক্সট্রাও দেখাবে
+    let extrasMsg = item.extras.length > 0 ? ` (${item.extras.map(e => `Extra ${e.name} x${e.qty}`).join(', ')})` : "";
+    
+    orderDetails += `• ${qty}x ${foodData.name}${extrasMsg} - ₹${price}\n`;
+  });
+
+  const message = `*🔔 New Order from Foodie App*\n\n` +
+                  `*👤 Name:* ${name}\n` +
+                  `*📍 Address:* ${address}\n\n` +
+                  `*🛒 Order Details:*\n${orderDetails}\n` +
+                  `*💰 Total Amount: ₹${totalAmount}*\n\n` +
+                  `_Please confirm my order. Thank you!_`;
+
+  const encodedMessage = encodeURIComponent(message);
+  
+  // আপনার নম্বরটি এখানে সেট করা হয়েছে
+  const whatsappURL = `https://wa.me/917548968062?text=${encodedMessage}`;
+  
+  document.getElementById('successName').innerText = name;
+  document.getElementById('checkoutForm').style.display = 'none';
+  document.getElementById('successScreen').classList.add('active');
+  
+  window.open(whatsappURL, '_blank');
+
+  cart = {};
+  saveCart();
+  renderMenu();
+  
+  document.getElementById('custName').value = '';
+  document.getElementById('custAddress').value = '';
+}
+
+function finishOrder() {
+  closeCheckout();
+}
+
+/* =========================================
+   INIT APP
+========================================= */
+renderCategories();
+renderMenu();
+updateUI();
+</script>
+</body>
+</html>
