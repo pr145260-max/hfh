@@ -1292,6 +1292,10 @@ updateUI();
 updateUserUI();
 updateOrderStrip();
 </script>
-<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+<script>
+  if (typeof navigator.serviceWorker !== 'undefined') {
+    navigator.serviceWorker.register('.sw.js')
+  }
+</script>
 </body>
 </html>
