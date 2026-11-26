@@ -34,19 +34,19 @@
     },
     {
       "src": "images/screenshot2.png",
-      "sizes": "1080x2136",
+      "sizes": "1080x2128",
       "type": "image/jpeg",
       "form_factor": "narrow"
     },
     {
       "src": "images/screenshot3.png",
-      "sizes": "1080x2136",
+      "sizes": "1080x2104",
       "type": "image/jpeg",
       "form_factor": "narrow"
     },
     {
       "src": "images/screenshot4.png",
-      "sizes": "1080x2136",
+      "sizes": "1078x2118",
       "type": "image/jpeg",
       "form_factor": "narrow"
     }
