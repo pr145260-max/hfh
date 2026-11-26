@@ -5,9 +5,9 @@
   "display": "standalone",
   "name": "Haldia food hub",
   "orientation": "any",
-  "scope": "/",
+  "scope": ".,",
   "short_name": "HFH",
-  "start_url": "/",
+  "start_url": ".",
   "theme_color": "#E53935",
   "id": "pr145260-max",
   "categories": [
