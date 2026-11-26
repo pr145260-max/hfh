@@ -7,7 +7,7 @@
   "orientation": "any",
   "scope": ".,",
   "short_name": "HFH",
-  "start_url": ".",
+  "start_url": "/hfh/",
   "theme_color": "#E53935",
   "id": "pr145260-max",
   "categories": [
