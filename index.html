@@ -595,8 +595,18 @@
       <div class="form-group">
         <label>Delivery Address</label>
         <textarea id="custAddress" rows="2" placeholder="Flat, Building, Street"></textarea>
+        
+        <!-- লোকেশন বাটন -->
+        <button type="button" onclick="getCustomerLocation()" id="locBtn" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--primary-light); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; border: 1px solid var(--primary); width: 100%;">
+          📍 Share Current Location
+        </button>
+        
+        <!-- লোকেশন স্ট্যাটাস ডিসপ্লে -->
+        <div id="locationStatus" style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+           <span id="locIcon">ℹ️</span> <span id="locText">Location not shared yet.</span>
+        </div>
       </div>
-      <button class="checkout-btn" style="margin-top: 10px;" onclick="placeOrder()">
+      <button class="checkout-btn" style="margin-top: 10px;" onclick="placeOrder()" id="orderBtn">
         <span>Order via WhatsApp</span>
         <span id="modalTotal" style="font-weight: 800;">₹0</span>
       </button>
@@ -614,7 +624,6 @@
         Please press "Send" in the app. We'll update you there!
       </p>
       
-      <!-- Copy Order ID Button -->
       <button class="copy-id-btn" onclick="copyOrderId()" id="copyIdBtn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         Copy Order ID
@@ -627,13 +636,27 @@
   </div>
 </div>
 
+<!-- ========== Custom Cancel Order Modal ========== -->
+<div class="modal-overlay" id="cancelOrderModal" onclick="if(event.target===this)closeCancelModal()">
+  <div class="modal-content" style="text-align: center; max-width: 320px; padding: 30px 20px;">
+    <div style="font-size: 56px; margin-bottom: 12px; animation: bounceIn 0.5s;">⚠️</div>
+    <h2 style="font-size: 22px; margin-bottom: 8px;">Cancel Order?</h2>
+    <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;">
+      Are you sure you want to request cancellation for this order? This action cannot be undone.
+    </p>
+    <div style="display: flex; gap: 12px;">
+      <button onclick="closeCancelModal()" style="flex: 1; padding: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-weight: 700; color: var(--text-main); font-size: 14px;">No, Keep it</button>
+      <button onclick="confirmCancelOrder()" style="flex: 1; padding: 14px; background: var(--primary); border: none; border-radius: 12px; font-weight: 700; color: white; font-size: 14px; box-shadow: 0 4px 12px rgba(229,57,53,0.3);">Yes, Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
 /* =========================================
    DATA CONFIGURATION
 ========================================= */
-// এখানে isAvailable: false করে দিলে ওই খাবারটি "Sold Out" হয়ে যাবে।
 const foods = [
   { id: 1, name: "Puri Sabzi", desc: "Delicious puri served with potato curry", qty: "1 Plate", price: 50, img: "images/puri.jpg", emoji: "🍛", cat: "Meals", tag: "BESTSELLER", isVeg: true, isAvailable: true,
     extras: [ { name: "Extra Puri", price: 10, qtyLabel: "1 Pc" }, { name: "Extra Sabzi", price: 20, qtyLabel: "" } ] },
@@ -680,7 +703,12 @@ let otpPhone = null;
 let currentFoodId = null;
 let currentExtras = {};
 
-// Hero Dismiss Logic (Session Based)
+// লোকেশন ভেরিয়েবল
+let customerLocation = { lat: null, lng: null, link: "" };
+const HALDIA_LAT = 22.0667;
+const HALDIA_LNG = 88.0698;
+
+// Hero Dismiss Logic
 const heroSection = document.getElementById('heroSection');
 if (sessionStorage.getItem('hfh_hero_dismissed') === 'true') {
   heroSection.style.display = 'none';
@@ -699,9 +727,9 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 
 function updateThemeIcon(theme) {
   if (theme === 'dark') {
-    themeIconSvg.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>'; // Sun
+    themeIconSvg.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
   } else {
-    themeIconSvg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>'; // Moon
+    themeIconSvg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
   }
 }
 updateThemeIcon(savedTheme);
@@ -732,7 +760,58 @@ function showToast(message) {
 }
 
 // =========================================
-// ORDER STRIP MANAGEMENT
+// LOCATION LOGIC (Manual)
+// =========================================
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * (Math.PI / 180);
+  var dLon = (lon2 - lon1) * (Math.PI / 180);
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function getCustomerLocation() {
+    const statusText = document.getElementById('locText');
+    const statusIcon = document.getElementById('locIcon');
+    const locBtn = document.getElementById('locBtn');
+    
+    statusText.innerText = "Fetching location...";
+    statusIcon.innerText = "⏳";
+    statusText.style.color = "var(--text-muted)";
+    locBtn.disabled = true;
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                customerLocation.lat = position.coords.latitude;
+                customerLocation.lng = position.coords.longitude;
+                customerLocation.link = `https://www.google.com/maps?q=${customerLocation.lat},${customerLocation.lng}`;
+                
+                statusText.innerText = "Location added successfully!";
+                statusText.style.color = "var(--green)";
+                statusIcon.innerText = "✅";
+                locBtn.disabled = false;
+                showToast('📍 Location added successfully!');
+            },
+            (error) => {
+                statusText.innerText = "Location permission denied.";
+                statusText.style.color = "var(--primary)";
+                statusIcon.innerText = "⚠️";
+                locBtn.disabled = false;
+                showToast('⚠️ Please allow location access.');
+            }
+        );
+    } else {
+        statusText.innerText = "Geolocation not supported.";
+        locBtn.disabled = false;
+    }
+}
+
+// =========================================
+// ORDER STRIP & CANCEL MODAL
 // =========================================
 function updateOrderStrip() {
   const strip = document.getElementById('orderStrip');
@@ -755,20 +834,29 @@ function dismissOrder() {
 
 function cancelOrder() {
   if (!activeOrder) return;
-  if (confirm('Are you sure you want to request order cancellation?')) {
-    const msg = encodeURIComponent(
-      `*❌ Order Cancellation Request*\n\n` +
-      `*Order ID:* #${activeOrder.orderId}\n` +
-      `*Name:* ${activeOrder.customerName}\n\n` +
-      `_Please cancel my order._`
-    );
-    window.open(`https://wa.me/917548968062?text=${msg}`, '_blank');
-    
-    activeOrder = null;
-    localStorage.removeItem('hfh_active_order');
-    updateOrderStrip();
-    showToast('Cancellation request sent on WhatsApp');
-  }
+  document.getElementById('cancelOrderModal').classList.add('active');
+}
+
+function closeCancelModal() {
+  document.getElementById('cancelOrderModal').classList.remove('active');
+}
+
+function confirmCancelOrder() {
+  if (!activeOrder) return;
+
+  const msg = encodeURIComponent(
+    `*❌ Order Cancellation Request*\n\n` +
+    `*Order ID:* #${activeOrder.orderId}\n` +
+    `*Name:* ${activeOrder.customerName}\n\n` +
+    `_Please cancel my order._`
+  );
+  window.open(`https://wa.me/917548968062?text=${msg}`, '_blank');
+  
+  activeOrder = null;
+  localStorage.removeItem('hfh_active_order');
+  updateOrderStrip();
+  closeCancelModal();
+  showToast('Cancellation request sent on WhatsApp');
 }
 
 // =========================================
@@ -817,7 +905,6 @@ function renderMenu() {
     const cnt = cart[food.id] ? cart[food.id].qty : 0;
     const isAvail = food.isAvailable !== false;
     
-    // Action Button logic based on availability
     let action = '';
     if (!isAvail) {
       action = `<button class="soldout-btn" disabled>Sold Out</button>`;
@@ -1216,13 +1303,31 @@ function closeCheckout() {
   document.body.style.overflow = '';
 }
 
-function placeOrder() {
+async function placeOrder() {
   const name = document.getElementById('custName').value.trim();
   const address = document.getElementById('custAddress').value.trim();
 
   if (!name || !address) {
     showToast('⚠️ Please fill all details');
     return;
+  }
+
+  const orderBtn = document.getElementById('orderBtn');
+  const originalBtnText = orderBtn.innerHTML;
+  
+  // যদি আগে থেকে লোকেশন না থাকে, তবে অর্ডারের সময় লোকেশন নেওয়ার চেষ্টা করবে
+  if (!customerLocation.lat) {
+      orderBtn.innerHTML = '<span>Getting Location...</span> <span>⏳</span>';
+      try {
+          const position = await new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 4000 });
+          });
+          customerLocation.lat = position.coords.latitude;
+          customerLocation.lng = position.coords.longitude;
+          customerLocation.link = `https://www.google.com/maps?q=${customerLocation.lat},${customerLocation.lng}`;
+      } catch (error) {
+          console.log("Auto-location failed:", error);
+      }
   }
 
   let details = "";
@@ -1241,14 +1346,27 @@ function placeOrder() {
     details += `• ${item.qty}x ${food.name}${extrasMsg} - ₹${lineTotal}\n`;
   });
 
-  // Unique Order ID generate
   const orderId = 'HFH' + Date.now().toString(36).slice(-6).toUpperCase();
+
+  // লোকেশন থেকে দূরত্ব বের করা
+  let distanceMsg = "";
+  let locationMsg = "";
+  
+  if (customerLocation.lat && customerLocation.lng) {
+      const distance = getDistanceFromLatLonInKm(customerLocation.lat, customerLocation.lng, HALDIA_LAT, HALDIA_LNG);
+      distanceMsg = `*🚗 Distance from Haldia Center:* ${distance.toFixed(1)} km\n`;
+      locationMsg = `*🗺️ Google Maps Location:* ${customerLocation.link}\n`;
+  } else {
+      locationMsg = `*🗺️ Google Maps Location:* Not shared\n`;
+  }
 
   const message =
     `*🔔 New Order — HFH (Haldia Food Hub)*\n` +
     `*Order ID:* #${orderId}\n\n` +
     `*👤 Name:* ${name}\n` +
     `*📍 Address:* ${address}\n` +
+    locationMsg +
+    distanceMsg +
     (currentUser && currentUser.phone ? `*📞 Phone:* +91 ${currentUser.phone}\n` : '') +
     `\n*🛒 Order Details:*\n${details}\n` +
     `*💰 Total: ₹${total}*\n\n` +
@@ -1257,7 +1375,6 @@ function placeOrder() {
   const encoded = encodeURIComponent(message);
   const waURL = `https://wa.me/917548968062?text=${encoded}`;
 
-  // Save active order for the top banner
   activeOrder = {
     orderId: orderId,
     items: totalItems,
@@ -1272,6 +1389,7 @@ function placeOrder() {
   document.getElementById('checkoutForm').style.display = 'none';
   document.getElementById('successScreen').classList.add('active');
 
+  orderBtn.innerHTML = originalBtnText;
   window.open(waURL, '_blank');
 
   cart = {};
@@ -1279,6 +1397,12 @@ function placeOrder() {
   renderMenu();
   document.getElementById('custName').value = '';
   document.getElementById('custAddress').value = '';
+  
+  // লোকেশন রিসেট
+  customerLocation = { lat: null, lng: null, link: "" };
+  document.getElementById('locText').innerText = "Location not shared yet.";
+  document.getElementById('locText').style.color = "var(--text-muted)";
+  document.getElementById('locIcon').innerText = "ℹ️";
 
   updateOrderStrip();
 }
